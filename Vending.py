@@ -195,6 +195,7 @@ def checkifidistoolong(drinkidname):
                 return yesnoreturn
     elif len(drinkidname) < 2:
         print(f"The name is too short !")
+        return 0
     else:
         flagforid = False
         return drinkidname
@@ -204,8 +205,9 @@ def checkifdrinkexist(exist, errorMsg):
         checkdrinkid = input(exist).strip().upper()
         if checkdrinkid in drinks:
             print(errorMsg)
+
         elif checkdrinkid == "0":
-            print("Goodbye !")
+            #print("Goodbye !")
             return checkdrinkid
         else:
             newdrinkid = checkifidistoolong(checkdrinkid)
@@ -219,7 +221,9 @@ def descriptioncheck(desc):
     global flagfordesc
     desc = input(desc).strip().title()
     while True:
-        if len(desc) > 13:
+        if desc == "0":
+            return "0"
+        elif len(desc) > 13:
             desc = desc[:12]
             print(f"Your description for the drink is too long I'll take onlty {desc} is that ok ?")
             while True:
@@ -256,7 +260,14 @@ def upordown(venerinput, errormsg):
             return venerinput
         else:
             print(errormsg)
-            return None
+            #return None
+
+def checkifpriceiszeroorneg(originalprice, errorMsg):
+    if originalprice <= 0:
+        print(errorMsg)
+        return None
+    else:
+        return originalprice
 
 def roundingofpricedown(originalprice):
     rounddown = int(originalprice * 10)/10
@@ -289,6 +300,58 @@ def confirmationofprice(venderinputofprice):
 def checkingquantity():
     pass
 
+def processofaddingnewdrink():
+    flagforid = True
+    flagfordesc = True
+    flagforprice = True
+
+    #Id Check
+    while flagforid:
+        getdrinkid = checkifdrinkexist("Enter drink id: ", "Drink id exists !")
+        print(f"This is get id: {getdrinkid}")
+
+        if getdrinkid == "0":
+            return "0"
+        
+        if getdrinkid == "N":
+            continue
+
+        flagforid = False
+    
+    # Desc Check after id pass
+    while flagfordesc:
+        getdesc = descriptioncheck("Enter description of drink: ")
+        print(f"This is get desc: {getdesc}")
+
+        if getdesc == "0":
+            return "0"
+        
+        if getdesc == "N":
+            continue
+
+        flagfordesc = False
+    
+    # Price check
+    while flagforprice:
+        pric = input("Enter price: ")
+        if pric == "0":
+            return
+        
+        if pric == "N":
+            continue
+        
+        tempprice = EnterFloat(pric, "Please enter a price !")
+        if tempprice is not None:
+            continue
+
+        price = checkifpriceiszeroorneg(tempprice, "Please enter more than 0 !")
+        if price is not None:
+            getprice = confirmationofprice(price)
+            print(f"This is get price: {getprice}")
+
+        flagforprice = False
+
+
 def add_drink_type(drink_id, description, price, quantity):
     pass
 
@@ -317,39 +380,11 @@ while True:
     if vendOrUser == "Y":
         VenderMenu()
         venderoption = checkvenderoption("Enter choice: ", "Please center a valid input ! >:( ").strip()
+        
         # add drink type
         if venderoption == "1":
-            while True:
-                getdesc = 1
-                print("If you do not wish to add press '0' !")
-                while flagforid:
-                    getdrinkid = checkifdrinkexist("Enter drink id: ", "Drink id exists !")
-                    print(f"This is get id: {getdrinkid}")
-                if getdrinkid != "0" and getdrinkid != "N":
-                    while flagfordesc:
-                        getdesc = descriptioncheck("Enter description of drink: ")
-                        print(f"This is get desc: {getdesc}")
-                        
-                        #Continue if id and desc pass
-                        if getdesc != "0" and getdesc != "N":
-                            while flagforprice:
-                                pric = input("Enter price: ")
-                                price = EnterFloat(pric, "Please enter a float !")
-                                if price is not None:
-                                    getprice = confirmationofprice(price)
-                                    print(f"This is get price: {getprice}")
-
-                                    if getprice != "0" and getprice != "N":
-                                        pass
-
-                if getdrinkid == "0":
-                    print("me next")
-                    break
-                if getdrinkid == "N" or getdesc == "N":
-                    print("pass")
-                    break
-                else:
-                    break
+            print("If you do not wish to add press '0' !")
+            processofaddingnewdrink()
 
         # replenish drink
         if venderoption == "2":
