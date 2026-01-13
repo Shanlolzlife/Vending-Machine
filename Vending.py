@@ -150,6 +150,7 @@ def drinkpayment(paymentno, errorMsg):
 # Get the customer drink list
 def drinkgetfromcustomer(uschoice):
     drinkhold.append(f"{uschoice}")
+    drinks[uschoice]['quantity'] -= 1
 
 # If paid remove the customer's drink list that has been dispense
 def removedrinkfromvend():
@@ -161,9 +162,19 @@ def removedrinkfromvend():
             while rmv in drinkhold:
                 drinkhold.remove(f"{rmv}")
 
+# Check if customer keeps getting same drink even if the quantity is 1
+def checkcustomerdrinklist(customerdrinkchoice):
+    if customerdrinkchoice not in drinkhold:
+        return True
+
+    if drinks[customerdrinkchoice]['quantity'] >= drinkhold.count(customerdrinkchoice):
+        return True
+    
+    return False
+
 # Checking if the drink that the user wants is available
 def customerdrinkselection (uschoice):
-    if uschoice in drinks and drinks[uschoice]['quantity'] > 0:
+    if uschoice in drinks and drinks[uschoice]['quantity'] > 0 and checkcustomerdrinklist(uschoice):
         drinkscal()
         drinkgetfromcustomer(uschoice)
         print(f"No. of drinks selected = {drinkstotal}")
