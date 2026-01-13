@@ -15,7 +15,7 @@ drinks = {''
 drinkhold = []
 
 # Drinks menu
-def Drinkmenu():
+def Drinkmenu(venderoruser):
     # print("{h1:5} {h2:15} {h3:9}".format(h1 = "Name", h2 = "Description", h3 = "Price"))
     for nme, descpric in drinks.items():
         dnme = nme
@@ -26,7 +26,9 @@ def Drinkmenu():
             print(f"{dnme}. {desc:13} (S${dpric:.1f}) ***Out of stock***")
         else:
             print(f"{dnme}. {desc:13} (S${dpric:.1f}) Qty: {dquant:}")
-    print("0. Exit / Payment")
+
+    if venderoruser == "N":
+        print("0. Exit / Payment")
 
 # Vender menu
 def VenderMenu():
@@ -195,26 +197,34 @@ def checkifidistoolong(drinkidname):
                 return yesnoreturn
     elif len(drinkidname) < 2:
         print(f"The name is too short !")
-        return 0
+        return "N"
     else:
         flagforid = False
         return drinkidname
 
-def checkifdrinkexist(exist, errorMsg):
+def checkifdrinkexist(venderinput, exist, errorMsg):
     while True:
         checkdrinkid = input(exist).strip().upper()
-        if checkdrinkid in drinks:
-            print(errorMsg)
 
-        elif checkdrinkid == "0":
-            #print("Goodbye !")
-            return checkdrinkid
-        else:
+        if checkdrinkid == "0":
+            return "0"
+
+        if venderinput == "1":
+            if checkdrinkid in drinks:
+                print(errorMsg)
+                continue
+            
             newdrinkid = checkifidistoolong(checkdrinkid)
             if newdrinkid == "N":
-                return newdrinkid
+                continue
+            return newdrinkid
+        
+        if venderinput == "2":
+            if checkdrinkid in drinks:
+                return checkdrinkid
             else:
-                return newdrinkid
+                print(errorMsg)
+                continue
 
 flagfordesc = True
 def descriptioncheck(desc):
@@ -238,6 +248,7 @@ def descriptioncheck(desc):
                     return yesornoturn
         elif len(desc) < 3:
             print(f"Your description for the drink is too short please type more")
+            return "N"
         else:
             flagfordesc = False 
             return desc
@@ -260,58 +271,93 @@ def upordown(venerinput, errormsg):
             return venerinput
         else:
             print(errormsg)
-            #return None
+            return None
 
 def checkifpriceiszeroorneg(originalprice, errorMsg):
-    if originalprice <= 0:
-        print(errorMsg)
-        return None
-    else:
-        return originalprice
+    while True:
+        if originalprice <= 0:
+            print(errorMsg)
+            return None
+        else:
+            return originalprice
 
 def roundingofpricedown(originalprice):
-    rounddown = int(originalprice * 10)/10
-    return float(rounddown)
+    return math.floor(originalprice * 10) / 10
 
 def roundingofpriceup(originalprice):
-    roundup = int(originalprice * 10) / 10
-    if (originalprice * 10) % 1 != 0:
-        roundup += 0.1
-    return float(roundup)
+    return math.ceil(originalprice * 10) / 10
 
 flagforprice = True
 def confirmationofprice(venderinputofprice):
-    global flagforprice
     while flagforprice:
         roundup = roundingofpriceup(venderinputofprice)
         rounddown = roundingofpricedown(venderinputofprice)
         deci = checkhowmanydecimals(venderinputofprice)
-        print (f"Sorry your price has {deci} decimal places. Please type 'D' for {str(rounddown)}.")
-        print(f"Or 'U' for {str(roundup)}.")
-        checkvenderchoice = upordown(input("Enter choice: ").upper(), "Type 'U' or 'D' please !")
-        print(checkvenderchoice)
-        if checkvenderchoice == "U":
-            flagforprice = False
-            return roundup
-        if checkvenderchoice == "D":
-            flagforprice = False
-            return rounddown
+        if deci == 1:
+            return venderinputofprice
+        else:
+            print (f"Sorry your price has {deci} decimal places. Please type 'D' for {str(rounddown)}.")
+            print(f"Or 'U' for {str(roundup)}.")
+            checkvenderchoice = upordown(input("Enter choice: ").upper(), "Type 'U' or 'D' please !")
+            print(checkvenderchoice)
+            if checkvenderchoice == "U":
+                return roundup
+            if checkvenderchoice == "D":
+                return rounddown
 
-def checkingquantity():
-    pass
+flagforquantity = True
+def maximuminvendingmachine(enternoofdrinknumber):
+    if enternoofdrinknumber == 0:
+        return "0"
+    if enternoofdrinknumber is None:
+        return None
+    if enternoofdrinknumber < 0:
+        print("Quantity number invalid !")
+        return "N"
+    if enternoofdrinknumber > 50:
+        print("Vending Machine can only hold maximum 50 drinks !")
+        return "N"
+    else:
+        return enternoofdrinknumber
 
-def processofaddingnewdrink():
+def checkingquantity(idofdrink, noofdrinksadding):
+    current_quantity = drinks[idofdrink]['quantity']
+
+    if noofdrinksadding == 0:
+        return "0"
+    
+    else:
+        if current_quantity > 5:
+            print("No need to replenish. Quantity is greater than 5.")
+            return None
+
+        if current_quantity + noofdrinksadding > 50:
+            print("Too many drinks added! Max capacity is 50.")
+            return None
+
+    return current_quantity + noofdrinksadding
+
+def add_drink_type(drink_id, description, price, quantity):
+    if drink_id != None and description != None and price != None and quantity != None:
+            drinks[drink_id] = {
+        "description": description,
+        "price": price,
+        "quantity": quantity
+    }
+
+def processofaddingnewdrink(venderinput):
     flagforid = True
     flagfordesc = True
     flagforprice = True
+    flagforquantity = True
 
     #Id Check
     while flagforid:
-        getdrinkid = checkifdrinkexist("Enter drink id: ", "Drink id exists !")
-        print(f"This is get id: {getdrinkid}")
+        getdrinkid = checkifdrinkexist(venderinput, "Enter drink id: ", "Drink id exists !")
+        # print(f"This is get id: {getdrinkid}")
 
         if getdrinkid == "0":
-            return "0"
+            return None
         
         if getdrinkid == "N":
             continue
@@ -321,10 +367,10 @@ def processofaddingnewdrink():
     # Desc Check after id pass
     while flagfordesc:
         getdesc = descriptioncheck("Enter description of drink: ")
-        print(f"This is get desc: {getdesc}")
+        # print(f"This is get desc: {getdesc}")
 
         if getdesc == "0":
-            return "0"
+            return None
         
         if getdesc == "N":
             continue
@@ -334,36 +380,85 @@ def processofaddingnewdrink():
     # Price check
     while flagforprice:
         pric = input("Enter price: ")
+
         if pric == "0":
-            return
+            return None
         
         if pric == "N":
             continue
+
+        temppric = EnterFloat(pric, "Please enter a price")
+        if temppric is None:
+            continue
         
-        tempprice = EnterFloat(pric, "Please enter a price !")
-        if tempprice is not None:
+        price = checkifpriceiszeroorneg(temppric, "Please enter more than 0 !")
+        if price is None:
             continue
 
-        price = checkifpriceiszeroorneg(tempprice, "Please enter more than 0 !")
-        if price is not None:
-            getprice = confirmationofprice(price)
-            print(f"This is get price: {getprice}")
-
+        getprice = confirmationofprice(price)
+        # print(f"This is get price: {getprice}")
         flagforprice = False
 
+    # Quantity check
+    while flagforquantity:
+        quantity = maximuminvendingmachine(EnterInt(input("Enter quantity: "), "Please input a number !"))
 
-def add_drink_type(drink_id, description, price, quantity):
-    pass
+        if quantity is None:
+            continue
+
+        if quantity == "N":
+            continue
+
+        if quantity == "0":
+            return None
+        
+        # print(f"This is the quantity {quantity}")
+        flagforquantity = False
+    
+    return getdrinkid, getdesc, getprice, quantity
 
 def replenish_drink(drink_id, quantity):
-    pass
+    if drink_id != None and quantity != None:
+        drinks[drink_id]['quantity'] = quantity
+        print(f"Updated {drink_id} quantity to {quantity}\n")
+
+def replenishdrinkprocess(venderinput):
+    last_drink = None
+    last_quantity = None
+
+    while True:
+        drink_id = checkifdrinkexist(venderinput, "Enter drink id: ", "Drink id does not exist!")
+        if drink_id == "0":
+            print("Goodbye!")
+            break
+
+        while True:
+            add_quantity = EnterInt(input("Enter quantity: ").strip(), "Enter a number!")
+            
+            if add_quantity is None:
+                continue
+            
+            if add_quantity == 0:
+                print("Canceled replenishment for this drink.\n")
+                break
+
+            new_quantity = checkingquantity(drink_id, add_quantity)
+            if new_quantity is None:
+                continue
+
+            replenish_drink(drink_id, new_quantity)
+            last_drink = drink_id
+            last_quantity = new_quantity
+            break
+    
+    return last_drink, last_quantity
 
 # Main loop
 while True:
     vendOrUser = checkyesorno("Are you a vendor (Y/N)?: ", "Please enter a valid input ! </3")
     loop = 3
     if vendOrUser == "N":
-        Drinkmenu()
+        Drinkmenu(vendOrUser)
         while True and loop == 3:
             customerdrinkselection(druschoice("Enter Choice: ", "Enter a drink name that is in the menu !"))
             if userchoice in drinks:
@@ -384,12 +479,24 @@ while True:
         # add drink type
         if venderoption == "1":
             print("If you do not wish to add press '0' !")
-            processofaddingnewdrink()
+            result = processofaddingnewdrink(venderoption)
+
+            if result is None:
+                print("No drink added")
+            else:
+                drink_id, description, price, quantity = result
+                add_drink_type(drink_id, description, price, quantity)
+                print(f"Drink has been successfully added {description}!")
 
         # replenish drink
         if venderoption == "2":
-            pass
+            Drinkmenu(vendOrUser)
+            print("Enter a drink id to replenish or type '0' to exit")
+            
+            updated_drink, updated_quantity = replenishdrinkprocess(venderoption)
+            if updated_drink is not None and updated_quantity is not None:
+                replenish_drink(updated_drink, updated_quantity)
+            
         # exit
         if venderoption == "0":
             print("Goodbye V-vendor-san! u///u")
-            break
