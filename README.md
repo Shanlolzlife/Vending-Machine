@@ -1,7 +1,7 @@
 # Vending-Machine
 Y1S1 assignment python
 
-Redo my assignment for y1s1 :)
+Redo my assignment for Y1S1 :)
 
 Test Case:
 if it's a customer:
@@ -15,7 +15,12 @@ if it is a vender:
   vender has to type a new short form for the drink only accepts 2 characters
   vender has to type a description less than 13 words and more than 3.
   vender has to also input a price that is not negative and if input more than 1 decimal place the system will give the vender 2 options whether to round it up or down
-  when inputting the quantity the vender is to check if the stock is more than 5 else vender can only top up the vending machine to max 50 in quantity
+  when inputting the quantity the vender can only top up the vending machine to max 50 in quantity
   if the vender unput another input the system will respond with the necessary error message
+
+  choice == 2: where vender replenish drink
+  drink has to exist and vender is to check if the stock is more than 5 else the system will not let the vender update the machine
+
+In all cases 0 = exit in the system
 
 The end - made by Shan  
